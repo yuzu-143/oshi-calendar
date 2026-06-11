@@ -587,6 +587,24 @@ if (!foundDates.length) {
   }
 }
 
+if (!foundDates.length) {
+  // 4: 7/1(水) / 7/1（水） みたいな形式（時刻18:30などを除外）
+  re = /(\d{1,2})\/(\d{1,2})[（(]?[日月火水木金土祝]?[）)]?/g;
+  while ((m = re.exec(trimmed)) !== null) {
+    var mo = parseInt(m[1]),
+        d  = parseInt(m[2]);
+    // 時刻（例: 18:30）を誤検出しないよう、分にあたる数値が00/15/30/45の場合はスキップ
+    var rawStr = m[0];
+    var nextChar = trimmed[re.lastIndex] || '';
+    if (nextChar === ':') continue; // 18:30 のような時刻パターンを除外
+    if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+      var yr = NOW.getFullYear();
+      if (mo < NOW.getMonth() + 1 || (mo === NOW.getMonth() + 1 && d < NOW.getDate())) yr++;
+      foundDates.push({ yr: yr, mo: mo, d: d, raw: rawStr });
+    }
+  }
+}
+
     if(!foundDates.length)return;
     var type=defType;
     for(var t in TYPE_KEYWORDS){if(TYPE_KEYWORDS[t].some(function(k){return ctxLower.includes(k.toLowerCase());})){type=t;break;}}
