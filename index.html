@@ -409,6 +409,7 @@ TREASURE THE STAGE 2026 JAPAN TOUR
     <div class="modal-body" id="m-body"></div>
     <div class="macts">
       <button class="bg2btn" style="color:#E24B4A;border-color:#E24B4A" onclick="delModal()">🗑 削除</button>
+      <button class="bg2btn" onclick="editModal()">✏️ 編集</button>
       <button class="bp" onclick="closeM()">閉じる</button>
     </div>
   </div>
@@ -856,6 +857,50 @@ function openModal(id){
 }
 function closeM(){document.getElementById('overlay').classList.remove('open');S.mid=null;}
 function delModal(){if(S.mid){delEv(S.mid);closeM();}}
+
+function editModal(){
+  var ev=S.events.find(function(e){return e.id===S.mid;});if(!ev)return;
+  var ar=S.artists.find(function(a){return a.id===ev.aid;});
+  var typeOpts=Object.entries(TM).map(function(e){
+    return '<option value="'+e[0]+'"'+(ev.type===e[0]?' selected':'')+'>'+e[1].label+'</option>';
+  }).join('');
+  var artOpts='<option value="">（なし）</option>'+S.artists.map(function(a){
+    return '<option value="'+a.id+'"'+(ev.aid===a.id?' selected':'')+'>'+esc(a.name)+'</option>';
+  }).join('');
+  var iStyle='width:100%;font-size:13px;font-family:var(--font);background:var(--bg);color:var(--t);border:1px solid var(--bd);border-radius:8px;padding:7px 10px;outline:none;margin-bottom:8px';
+  document.getElementById('m-title').textContent='イベントを編集';
+  document.getElementById('m-body').innerHTML=
+    '<div style="margin-bottom:6px"><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:3px">タイトル</label>'
+    +'<input type="text" id="edit-title" value="'+esc(ev.title)+'" style="'+iStyle+'"></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<div><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:3px">日付</label>'
+    +'<input type="date" id="edit-date" value="'+ev.date+'" style="'+iStyle.replace('margin-bottom:8px','')+'"></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:3px">種類</label>'
+    +'<select id="edit-type" style="'+iStyle.replace('margin-bottom:8px','')+'">'+typeOpts+'</select></div>'
+    +'</div>'
+    +'<div style="margin-bottom:8px"><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:3px">アーティスト</label>'
+    +'<select id="edit-art" style="'+iStyle.replace('margin-bottom:8px','')+'">'+artOpts+'</select></div>'
+    +'<div><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:3px">メモ</label>'
+    +'<textarea id="edit-note" style="'+iStyle+'min-height:60px;resize:vertical">'+esc(ev.note||'')+'</textarea></div>';
+  // ボタンを保存に切り替え
+  document.querySelector('.macts').innerHTML=
+    '<button class="bg2btn" onclick="openModal(S.mid)">キャンセル</button>'
+    +'<button class="bp" onclick="saveModal()">✓ 保存</button>';
+}
+
+function saveModal(){
+  var ev=S.events.find(function(e){return e.id===S.mid;});if(!ev)return;
+  var title=document.getElementById('edit-title').value.trim();
+  var date =document.getElementById('edit-date').value;
+  if(!title||!date){alert('タイトルと日付は必須です');return;}
+  ev.title=title;
+  ev.date =date;
+  ev.type =document.getElementById('edit-type').value;
+  ev.aid  =document.getElementById('edit-art').value;
+  ev.note =document.getElementById('edit-note').value.trim();
+  sv();renderCal();renderAllEvs();renderUpcoming();
+  closeM();
+}
 
 function chM(d){S.mo+=d;if(S.mo>11){S.mo=0;S.yr++;}if(S.mo<0){S.mo=11;S.yr--;}renderCal();document.getElementById('evlist').innerHTML='';}
 function goNow(){S.mo=NOW.getMonth();S.yr=NOW.getFullYear();renderCal();document.getElementById('evlist').innerHTML='';}
