@@ -410,6 +410,7 @@ TREASURE THE STAGE 2026 JAPAN TOUR
     <div class="macts">
       <button class="bg2btn" style="color:#E24B4A;border-color:#E24B4A" onclick="delModal()">🗑 削除</button>
       <button class="bg2btn" onclick="editModal()">✏️ 編集</button>
+      <button class="bg2btn" id="m-task-btn" onclick="addTaskFromModal()">✅ タスクに追加</button>
       <button class="bp" onclick="closeM()">閉じる</button>
     </div>
   </div>
@@ -853,6 +854,14 @@ function openModal(id){
     +arBadge+cntBadge+'</div>'
     +'<div style="font-size:14px;font-weight:700;color:var(--t);margin-bottom:2px">📅 '+ev.date+'（'+dow+'）</div>'
     +notePart;
+  // タスク追加ボタンの状態を更新
+  var taskBtn=document.getElementById('m-task-btn');
+  if(taskBtn){
+    var already=S.tasks.some(function(t){return t.fromEventId===id;});
+    taskBtn.textContent=already?'✅ タスク登録済み':'✅ タスクに追加';
+    taskBtn.disabled=already;
+    taskBtn.style.opacity=already?'0.5':'1';
+  }
   document.getElementById('overlay').classList.add('open');
 }
 function closeM(){document.getElementById('overlay').classList.remove('open');S.mid=null;}
@@ -886,6 +895,34 @@ function editModal(){
   document.querySelector('.macts').innerHTML=
     '<button class="bg2btn" onclick="openModal(S.mid)">キャンセル</button>'
     +'<button class="bp" onclick="saveModal()">✓ 保存</button>';
+}
+
+function addTaskFromModal(){
+  var ev=S.events.find(function(e){return e.id===S.mid;});if(!ev)return;
+  // すでに同じイベントからのタスクがあれば追加しない
+  var already=S.tasks.some(function(t){return t.fromEventId===ev.id;});
+  if(already){alert('このイベントはすでにタスクに登録されています');return;}
+  S.tasks.push({
+    id:'t'+Date.now(),
+    name:ev.title,
+    date:ev.date,
+    pri:'high',
+    note:ev.note||'',
+    done:false,
+    fromEvent:true,
+    fromEventId:ev.id,
+    artId:ev.aid||'',
+    kbStatus:'todo'
+  });
+  svTask();renderTasks();
+  // ボタンを登録済みに変更
+  var taskBtn=document.getElementById('m-task-btn');
+  if(taskBtn){
+    taskBtn.textContent='✅ タスク登録済み';
+    taskBtn.disabled=true;
+    taskBtn.style.opacity='0.5';
+  }
+  alert('タスクに追加しました！');
 }
 
 function saveModal(){
