@@ -47,7 +47,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t);min-height:100v
 .cell:hover{border-color:var(--bd2)}
 .cell.today{border-color:var(--pk)!important;background:var(--pkl)}
 .cell.dim .dn{opacity:.25}
-.cell.sun .dn{color:#E24B4A}.cell.sat .dn{color:#378ADD}
+.cell.sun .dn{color:#E24B4A}.cell.sat .dn{color:#378ADD}.cell.holiday .dn{color:#E24B4A}.cell.holiday .hday-label{font-size:8px;color:#E24B4A;display:block;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dn{font-size:12px;font-weight:700;margin-bottom:3px}
 .cell.today .dn{color:var(--pk)}
 .edot{font-size:11px;padding:3px 6px;border-radius:5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;cursor:pointer;font-weight:500;display:flex;flex-direction:column;gap:1px}
@@ -417,6 +417,28 @@ TREASURE THE STAGE 2026 JAPAN TOUR
 </div>
 
 <script>
+// ━━ 2026年 祝日・振替休日・国民の休日 ━━━━━━━━━━━━
+var HOLIDAYS={
+  '2026-01-01':'元日',
+  '2026-01-12':'成人の日',
+  '2026-02-11':'建国記念の日',
+  '2026-02-23':'天皇誕生日',
+  '2026-03-20':'春分の日',
+  '2026-04-29':'昭和の日',
+  '2026-05-03':'憲法記念日',
+  '2026-05-04':'みどりの日',
+  '2026-05-05':'こどもの日',
+  '2026-05-06':'振替休日',
+  '2026-07-20':'海の日',
+  '2026-08-11':'山の日',
+  '2026-09-21':'敬老の日',
+  '2026-09-22':'国民の休日',
+  '2026-09-23':'秋分の日',
+  '2026-10-12':'スポーツの日',
+  '2026-11-03':'文化の日',
+  '2026-11-23':'勤労感謝の日'
+};
+
 const TM={
   live:   {label:'ライブ・コンサート',color:'#D4537E',bg:'#FBEAF0',tc:'#993556',cls:'el'},
   release:{label:'リリース日',        color:'#534AB7',bg:'#EEEDFE',tc:'#3C3489',cls:'er'},
@@ -775,7 +797,8 @@ function renderCal(){
   html+=cells.map(function(c){
     var it=c.date===tdStr;
     var evs=c.date?(em[c.date]||[]):[];
-    var cls='cell';if(!c.cur)cls+=' dim';if(it)cls+=' today';if(c.dow===0)cls+=' sun';if(c.dow===6)cls+=' sat';
+    var isHoliday=c.date&&HOLIDAYS[c.date];
+    var cls='cell';if(!c.cur)cls+=' dim';if(it)cls+=' today';if(c.dow===0)cls+=' sun';if(c.dow===6)cls+=' sat';if(isHoliday)cls+=' holiday';
     var dots=evs.slice(0,3).map(function(ev){
       var short=ev.title.length>12?ev.title.slice(0,12)+'…':ev.title;
       var ar=S.artists.find(function(a){return a.id===ev.aid;});
@@ -790,7 +813,7 @@ function renderCal(){
     }).join('');
     var more=evs.length>3?'<div class="more">+' +(evs.length-3)+'件</div>':'';
     return '<div class="'+cls+'" onclick="'+(c.date?'showDay(\''+c.date+'\')':'')+'">'
-      +'<div class="dn">'+c.day+'</div>'+dots+more+'</div>';
+      +'<div class="dn">'+c.day+'</div>'+(isHoliday?'<div class="hday-label">'+isHoliday+'</div>':'')+dots+more+'</div>';
   }).join('');
   document.getElementById('cgrid').innerHTML=html;
   renderUpcoming();
